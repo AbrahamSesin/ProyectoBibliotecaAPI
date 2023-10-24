@@ -14,6 +14,15 @@ class LibroController{
         res.json({"Id insertado": result.insertId});
     }
 
+
+        //Implementacion de actualizacion del libro
+    async update(req, res){
+        const libro = req.body;
+        const [result] = await pool.query(`UPDATE libros SET nombre=?, autor=?, categoria=?, aniopublicacion=?, isbn=? WHERE id=?`, [libro.nombre, libro.autor, libro.categoria, libro.aniopublicacion, libro.isbn, libro.id]);
+        res.json({"Actializacion del libro exitosa": libro.nombre});
+        
+    }
+
     async delete(req, res) {
         try {
             const libro = req.body;
