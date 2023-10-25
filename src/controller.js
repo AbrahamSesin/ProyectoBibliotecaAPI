@@ -27,13 +27,24 @@ class LibroController{
         }
     }
 
-
-        //Implementacion de actualizacion del libro
-    async update(req, res){
+        //Implementacion de actualizacion del libro (Editar), con la implementacion de (try-catch) si recibimos el num de dato ISBN incorrecto
+    async update(req, res) {
         const libro = req.body;
-        const [result] = await pool.query(`UPDATE libros SET nombre=?, autor=?, categoria=?, aniopublicacion=?, isbn=? WHERE id=?`, [libro.nombre, libro.autor, libro.categoria, libro.aniopublicacion, libro.isbn, libro.id]);
-        res.json({"Actializacion del libro exitosa": libro.nombre});
+        const isbn_libro = parseInt(libro.isbn);
         
+        try {
+            // Verificar si el libro existe en la base de datos
+            const [result] = await pool.query(`SELECT * FROM libros WHERE isbn=(?)`, [isbn_libro]);
+            if (result.length === 0) {
+                throw new Error('No se encontró ningún libro con el campo ISBN proporcionado');
+            }
+        
+            // Realizar la modificación del libro
+            const [updateResult] = await pool.query(`UPDATE libros SET nombre=?, autor=?, categoria=?, aniopublicacion=?, isbn=? WHERE isbn=?`, [libro.nombre, libro.autor, libro.categoria, libro.aniopublicacion, libro.isbn, isbn_libro]);
+            res.json({"Actualización del libro exitosa": libro.nombre});
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
     }
 
         //Implementacion de eliminar libro a traves del campo ISBN con implementacion de  (try-catch)
