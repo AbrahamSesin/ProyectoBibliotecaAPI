@@ -64,15 +64,25 @@ class LibroController{
         }
     }
 
-    async getOne(req, res){
-        const libro = req.body;
-        const isbn_libro = parseInt(libro.isbn);
-        const [result] = await pool.query(`SELECT * FROM libros WHERE isbn=(?)`, [isbn_libro]);
-
-        if (result[0] != undefined) {
-            res.json(result);
-        } else {
-            res.json({"Error": "Ups, no se encuentran elemento isbn del libro"});
+    async getOne(req, res) {
+        try {
+            const libro = req.body;
+            const isbn_libro = parseInt(libro.isbn);
+            
+            // Verificar si el campo ISBN es un número válido
+            if (isNaN(isbn_libro)) {
+                throw new Error('El campo ISBN proporcionado no es un número válido');
+            }
+            
+            const [result] = await pool.query(`SELECT * FROM libros WHERE isbn=(?)`, [isbn_libro]);
+    
+            if (result[0] !== undefined) {
+                res.json(result);
+            } else {
+                res.json({"Error": "Ups, no se encuentra ningún elemento con el ISBN del libro"});
+            }
+        } catch (error) {
+            res.status(400).json({ error: error.message });
         }
     }
     
